@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HiTeach Radio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#12211C;
+  --surface:#1A2E27;
+  --surface-2:#213830;
+  --surface-3:#2A453B;
+  --ink:#F2EFE6;
+  --ink-soft:#C7D2C9;
+  --ink-faint:#7E9389;
+  --accent:#E8A33D;
+  --accent-ink:#20160A;
+  --accent-2:#D9704F;
+  --line:#2E463C;
+  --line-soft:#243A32;
+  --shadow: 0 1px 2px rgba(0,0,0,.25), 0 12px 30px -12px rgba(0,0,0,.6);
+  --meter-lo:#3C5B4C;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#F3F0E6;
+    --surface:#FFFFFF;
+    --surface-2:#EAE5D6;
+    --surface-3:#DFD9C6;
+    --ink:#1B2A23;
+    --ink-soft:#46574C;
+    --ink-faint:#7C8B80;
+    --accent:#B5731A;
+    --accent-ink:#FFFBF2;
+    --accent-2:#B5502F;
+    --line:#D9D2BC;
+    --line-soft:#E4DFCC;
+    --shadow: 0 1px 2px rgba(30,25,10,.06), 0 10px 26px -12px rgba(30,25,10,.18);
+    --meter-lo:#CFC7A9;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12211C; --surface:#1A2E27; --surface-2:#213830; --surface-3:#2A453B;
+  --ink:#F2EFE6; --ink-soft:#C7D2C9; --ink-faint:#7E9389;
+  --accent:#E8A33D; --accent-ink:#20160A; --accent-2:#D9704F;
+  --line:#2E463C; --line-soft:#243A32;
+  --shadow: 0 1px 2px rgba(0,0,0,.25), 0 12px 30px -12px rgba(0,0,0,.6);
+  --meter-lo:#3C5B4C;
+}
+
+*{ box-sizing:border-box; }
+html{ background:var(--bg); }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Source Serif 4', Georgia, serif;
+  padding:0 18px;
+}
+::selection{ background:var(--accent); color:var(--accent-ink); }
+.mono{ font-family:'IBM Plex Mono', ui-monospace, Menlo, monospace; }
+.marquee{ font-family:'Bebas Neue', 'Arial Narrow', sans-serif; letter-spacing:.03em; }
+
+.shell{ max-width:1080px; margin:0 auto; padding-block:32px 70px; }
+
+/* ---- Header / on-air strip ---- */
+header.top{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding-bottom:20px; margin-bottom:22px; border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.brand{ display:flex; align-items:center; gap:14px; }
+.dial{
+  width:46px; height:46px; border-radius:50%; flex:none;
+  background:
+    radial-gradient(circle at 50% 42%, var(--accent) 0 6px, transparent 7px),
+    conic-gradient(from -90deg, var(--surface-3) 0 8deg, transparent 8deg 42deg, var(--surface-3) 42deg 50deg, transparent 50deg 84deg, var(--surface-3) 84deg 92deg, transparent 92deg 126deg, var(--surface-3) 126deg 134deg, transparent 134deg 168deg, var(--surface-3) 168deg 176deg, transparent 176deg 210deg, var(--surface-3) 210deg 218deg, transparent 218deg 252deg, var(--surface-3) 252deg 260deg, transparent 260deg 294deg, var(--surface-3) 294deg 302deg, transparent 302deg 336deg, var(--surface-3) 336deg 344deg, transparent 344deg 360deg);
+  border:1px solid var(--line);
+}
+.brand h1{ font-family:'Bebas Neue', sans-serif; font-size:30px; letter-spacing:.04em; margin:0; line-height:1; color:var(--ink); }
+.brand .tag{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); letter-spacing:.08em; text-transform:uppercase; margin-top:4px; }
+.onair{
+  display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace;
+  font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent);
+  border:1px solid var(--accent); border-radius:99px; padding:6px 13px 6px 10px;
+}
+.onair .bulb{ width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px 1px var(--accent); animation:pulse 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce){ .onair .bulb{ animation:none; } }
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+
+.lede{ color:var(--ink-soft); font-size:16px; max-width:64ch; line-height:1.65; margin:0 0 28px; }
+.lede b{ color:var(--ink); }
+
+/* ---- Preset rail ---- */
+.presets{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:28px; }
+.preset{
+  text-align:left; cursor:pointer; border:1px solid var(--line); background:var(--surface);
+  border-radius:10px; padding:14px 14px 13px; display:flex; flex-direction:column; gap:8px;
+  color:var(--ink); box-shadow:var(--shadow);
+}
+.preset .code{
+  font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:.03em; line-height:1;
+  width:44px; height:32px; display:flex; align-items:center; justify-content:center;
+  border-radius:6px; color:var(--accent-ink);
+}
+.preset .name{ font-size:13.5px; font-weight:600; font-family:'Source Serif 4',serif; line-height:1.25; }
+.preset .count{ font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-faint); letter-spacing:.04em; }
+.preset.active{ border-color:var(--accent); }
+.preset:not(.active):hover{ border-color:var(--ink-faint); }
+
+/* ---- Tracklist ---- */
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:26px; }
+.panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding:18px 20px 14px; border-bottom:1px solid var(--line-soft); flex-wrap:wrap; }
+.panel-head h2{ font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:.02em; margin:0; }
+.panel-head p{ margin:4px 0 0; color:var(--ink-faint); font-size:13px; max-width:56ch; }
+.panel-head .n{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); }
+
+.track{
+  display:flex; align-items:center; gap:14px; padding:13px 20px; border-bottom:1px solid var(--line-soft);
+  cursor:pointer;
+}
+.track:last-child{ border-bottom:none; }
+.track:hover{ background:var(--surface-2); }
+.track.open{ background:var(--surface-2); }
+.track .idx{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-faint); width:26px; flex:none; }
+.track .ttl{ flex:1; min-width:0; }
+.track .ttl .t{ display:block; font-size:15px; font-weight:600; line-height:1.35; }
+.track .ttl .s{ display:block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-faint); letter-spacing:.03em; margin-top:2px; text-transform:uppercase; }
+.track .dur{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-faint); flex:none; }
+.track .playdot{
+  width:30px; height:30px; border-radius:50%; border:1px solid var(--line); flex:none;
+  display:flex; align-items:center; justify-content:center; color:var(--ink-soft); font-size:11px;
+}
+.track.playing .playdot{ border-color:var(--accent); color:var(--accent); }
+
+/* ---- Now playing ---- */
+.nowplaying{ display:none; border-top:1px solid var(--line); background:var(--surface-2); }
+.nowplaying.show{ display:block; }
+.np-inner{ padding:22px 24px 26px; }
+.np-top{ display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+.np-play{
+  flex:none; width:56px; height:56px; border-radius:50%; border:none; cursor:pointer;
+  background:var(--accent); color:var(--accent-ink); font-size:20px; display:flex; align-items:center; justify-content:center;
+  box-shadow:var(--shadow);
+}
+.np-play:hover{ filter:brightness(1.06); }
+.np-meta{ flex:1; min-width:220px; }
+.np-meta h3{ font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:.02em; margin:0 0 4px; line-height:1.15; }
+.np-meta .scope{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent); text-transform:uppercase; letter-spacing:.06em; }
+.meter{ display:flex; align-items:flex-end; gap:3px; height:22px; margin-top:10px; }
+.meter span{ width:4px; background:var(--meter-lo); border-radius:2px; height:20%; transition:height .12s ease; }
+.meter.live span{ background:var(--accent); animation:bar 0.9s ease-in-out infinite; }
+.meter span:nth-child(1){ animation-delay:0s; } .meter span:nth-child(2){ animation-delay:.1s; }
+.meter span:nth-child(3){ animation-delay:.2s; } .meter span:nth-child(4){ animation-delay:.3s; }
+.meter span:nth-child(5){ animation-delay:.15s; } .meter span:nth-child(6){ animation-delay:.25s; }
+.meter span:nth-child(7){ animation-delay:.05s; } .meter span:nth-child(8){ animation-delay:.35s; }
+@keyframes bar{ 0%,100%{ height:20%; } 50%{ height:95%; } }
+@media (prefers-reduced-motion: reduce){ .meter.live span{ animation:none; height:60%; } }
+
+.script{ font-size:16px; line-height:1.8; color:var(--ink); max-width:70ch; }
+.script p{ margin:0 0 14px; }
+.script p:last-child{ margin-bottom:0; }
+
+.sources{ margin-top:18px; }
+.sources summary{ cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em; }
+.sources ul{ margin:10px 0 0; padding-left:18px; }
+.sources li{ font-size:12.5px; color:var(--ink-faint); margin-bottom:6px; line-height:1.5; }
+.sources li b{ color:var(--ink-soft); font-weight:600; }
+
+footer{ margin-top:50px; padding-top:20px; border-top:1px solid var(--line); color:var(--ink-faint); font-size:12px; line-height:1.7; }
+
+@media (max-width:640px){
+  .presets{ grid-template-columns:repeat(2,1fr); }
+  .shell{ padding-block:24px 50px; }
+}
+</style>
+
+</head>
+<body>
+<div class="shell">
+
+<header class="top">
+  <div class="brand">
+    <div class="dial"></div>
+    <div>
+      <h1>HiTeach Radio</h1>
+      <div class="tag">English digest · HABOOK / TEAM Model</div>
+    </div>
+  </div>
+  <div class="onair"><span class="bulb"></span>On air</div>
+</header>
+
+<p class="lede">An English-language digest of <b>habook.com</b>'s Chinese-language updates since <b>January 2026</b> — read aloud, right in this page. Four channels, twenty-five episodes: monthly news, the year's events, three research papers, and a run of educator profiles. Press play on any episode; the transcript stays on screen the whole time.</p>
+
+<div class="presets" id="presets"></div>
+
+<div id="panelHost"></div>
+
+<footer>
+  Source: habook.com (教育快訊 / 活動專區 / 學術發表 / 成功案例・智慧名師), Traditional Chinese, fetched through 2026‑09‑16. Scripts are original English summaries written from that source material, not machine translations — figures, names and quotes are preserved but phrasing is written fresh for listening rather than reading. Playback uses your browser's built-in speech synthesis; voice and quality depend on your device.
+</footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  var SHOWS = window.__HITEACH_RADIO_SHOWS__ || [];
+  var presetsEl = document.getElementById('presets');
+  var hostEl = document.getElementById('panelHost');
+  var state = { showIdx:0, openTrack:{}, };
+  var utter = null;
+  var playingKey = null;
+
+  function estMinutes(text){
+    var words = text.trim().split(/\s+/).length;
+    var mins = words/150;
+    if(mins < 1) return Math.max(1, Math.round(mins*60)) + ' sec';
+    return Math.round(mins*10)/10 + ' min';
+  }
+
+  function stopSpeech(){
+    if('speechSynthesis' in window) speechSynthesis.cancel();
+    playingKey = null;
+    renderPanel();
+  }
+
+  var pickedVoice = null;
+  function pickVoice(){
+    if(!('speechSynthesis' in window)) return;
+    var voices = speechSynthesis.getVoices();
+    pickedVoice = voices.find(function(v){ return /en-US/i.test(v.lang); }) || voices.find(function(v){ return /^en/i.test(v.lang); }) || null;
+  }
+  if('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+
+  function speak(key, text, onEnd){
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    if(pickedVoice) u.voice = pickedVoice;
+    u.rate = 1.0;
+    u.onend = function(){ if(playingKey===key){ playingKey = null; renderPanel(); } if(onEnd) onEnd(); };
+    u.onerror = u.onend;
+    speechSynthesis.speak(u);
+    playingKey = key;
+  }
+
+  function renderPresets(){
+    presetsEl.innerHTML = '';
+    SHOWS.forEach(function(show, i){
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'preset' + (i===state.showIdx ? ' active' : '');
+      btn.innerHTML =
+        '<span class="code" style="background:'+show.color+'">'+show.code+'</span>' +
+        '<span class="name">'+show.name+'</span>' +
+        '<span class="count mono">'+show.episodes.length+' EP' + (show.episodes.length===1?'':'S') + '</span>';
+      btn.addEventListener('click', function(){
+        if(state.showIdx === i) return;
+        stopSpeech();
+        state.showIdx = i;
+        renderPresets();
+        renderPanel();
+      });
+      presetsEl.appendChild(btn);
+    });
+  }
+
+  function scriptParagraphs(script){
+    return script.split(/\n\n+/).map(function(p){ return p.trim(); }).filter(Boolean);
+  }
+
+  function renderPanel(){
+    var show = SHOWS[state.showIdx];
+    hostEl.innerHTML = '';
+    var panel = document.createElement('div');
+    panel.className = 'panel';
+
+    var head = document.createElement('div');
+    head.className = 'panel-head';
+    head.innerHTML =
+      '<div><h2>'+show.name+'</h2><p>'+show.blurb+'</p></div>' +
+      '<div class="n mono">'+show.episodes.length+' episode'+(show.episodes.length===1?'':'s')+'</div>';
+    panel.appendChild(head);
+
+    var openIdx = state.openTrack[show.code];
+
+    show.episodes.forEach(function(ep, i){
+      var row = document.createElement('div');
+      var isOpen = openIdx === i;
+      var isPlaying = playingKey === (show.code+'-'+i);
+      row.className = 'track' + (isOpen?' open':'') + (isPlaying?' playing':'');
+      row.innerHTML =
+        '<span class="idx mono">'+String(i+1).padStart(2,'0')+'</span>' +
+        '<span class="playdot">'+(isPlaying ? '❚❚' : '▶')+'</span>' +
+        '<span class="ttl"><span class="t">'+ep.title+'</span><span class="s">'+ep.scope+'</span></span>' +
+        '<span class="dur mono">'+estMinutes(ep.script)+'</span>';
+      row.addEventListener('click', function(){
+        state.openTrack[show.code] = isOpen ? null : i;
+        renderPanel();
+      });
+      panel.appendChild(row);
+
+      if(isOpen){
+        var np = document.createElement('div');
+        np.className = 'nowplaying show';
+        var inner = document.createElement('div');
+        inner.className = 'np-inner';
+
+        var top = document.createElement('div');
+        top.className = 'np-top';
+        var playBtn = document.createElement('button');
+        playBtn.type = 'button';
+        playBtn.className = 'np-play';
+        var key = show.code+'-'+i;
+        playBtn.innerHTML = isPlaying ? '❚❚' : '▶';
+        playBtn.addEventListener('click', function(e){
+          e.stopPropagation();
+          if(playingKey === key){ stopSpeech(); }
+          else { speak(key, ep.script); renderPanel(); }
+        });
+        var meta = document.createElement('div');
+        meta.className = 'np-meta';
+        meta.innerHTML = '<div class="scope mono">'+ep.scope+'</div><h3>'+ep.title+'</h3>';
+        var meterWrap = document.createElement('div');
+        meterWrap.className = 'meter' + (isPlaying ? ' live' : '');
+        for(var b=0;b<8;b++){ var s=document.createElement('span'); meterWrap.appendChild(s); }
+        meta.appendChild(meterWrap);
+        top.appendChild(playBtn);
+        top.appendChild(meta);
+        inner.appendChild(top);
+
+        var scriptEl = document.createElement('div');
+        scriptEl.className = 'script';
+        scriptParagraphs(ep.script).forEach(function(p){
+          var pEl = document.createElement('p');
+          pEl.textContent = p;
+          scriptEl.appendChild(pEl);
+        });
+        inner.appendChild(scriptEl);
+
+        if(ep.sources && ep.sources.length){
+          var det = document.createElement('details');
+          det.className = 'sources';
+          var sum = document.createElement('summary');
+          sum.textContent = 'Covered in this episode (' + ep.sources.length + ' source' + (ep.sources.length===1?'':'s') + ')';
+          det.appendChild(sum);
+          var ul = document.createElement('ul');
+          ep.sources.forEach(function(s){
+            var li = document.createElement('li');
+            li.innerHTML = '<b>['+s.date+']</b> '+s.zh;
+            ul.appendChild(li);
+          });
+          det.appendChild(ul);
+          inner.appendChild(det);
+        }
+
+        np.appendChild(inner);
+        panel.appendChild(np);
+      }
+    });
+
+    hostEl.appendChild(panel);
+  }
+
+  renderPresets();
+  renderPanel();
+})();
+</script>
+
+</body>
+</html>
